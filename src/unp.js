@@ -1,18 +1,7 @@
-// @TODO:
-
-// -change event logs to write to a jsonfile
-// -parse events by function sigs and useful info
-// -verifiy tx later
-// -method to return current window
-// -br opportunity
-// -test garbage data send
-// -test garbage data send on react
-// -smart gas handling
-// -smart nonce hangling
-
 const Web3 = require('web3');
 const Tx = require('ethereumjs-tx').Transaction;
 const { infuraKey, wsPort } = require('../config');
+
 let tournAbi = require('.//ABIs/tournAbi.json');
 let gateAbi = require('.//ABIs/gateAbi.json');
 let guildAbi = require('./ABIs/guildAbi.json');
@@ -277,8 +266,6 @@ const sendSigned = async (key, txData) => {
 ////////////////
 // CORE LOGIC //
 ////////////////
-
-// @todo
 
 
 
