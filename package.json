@@ -1,0 +1,13 @@
+{
+  "name": "unpbot",
+  "version": "1.0.0",
+  "description": "tools for monitoring and automating the CheezeWizards Unpasteurized tournament",
+  "main": "./src/unp.js",
+  "author": "https://github.com/nicholashc",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "ethereumjs-tx": "^2.1.1",
+    "web3": "^1.2.2"
+  }
+}
