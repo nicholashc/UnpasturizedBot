@@ -5,6 +5,9 @@
   "main": "./src/unp.js",
   "author": "https://github.com/nicholashc",
   "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "dotenv": "^8.2.0",
     "ethereumjs-tx": "^2.1.1",

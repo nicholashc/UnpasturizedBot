@@ -1,13 +1,14 @@
 const Web3 = require('web3');
 const Tx = require('ethereumjs-tx').Transaction;
-const { infuraKey, wsPort } = require('../config');
+const fs = require('fs');
+const result = require('dotenv').config({ path: '../.env' });
 
-let tournAbi = require('.//ABIs/tournAbi.json');
-let gateAbi = require('.//ABIs/gateAbi.json');
+let tournAbi = require('./ABIs/tournAbi.json');
+let gateAbi = require('./ABIs/gateAbi.json');
 let guildAbi = require('./ABIs/guildAbi.json');
 
-// const web3 = new Web3(new Web3.providers.WebsocketProvider(`wss://mainnet.infura.io/ws/v3/${infuraKey}`));
-const web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://localhost:${wsPort}`));
+const web3 = new Web3(new Web3.providers.WebsocketProvider(`wss://mainnet.infura.io/ws/v3/${infuraKey}`));
+// const web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://localhost:${wsPort}`));
 
 //////////////////////
 // CONTRACT OBJECTS //
@@ -181,6 +182,9 @@ const getUserWizBalance = async (address) => {
 // GENERAL EVENTS //
 ////////////////////
 
+let path = './data/txData.json';
+let txData = [];
+
 const subscription = web3.eth.subscribe('pendingTransactions')
 	.on("data", async (tx) => {
 		try {
@@ -202,13 +206,18 @@ const subscription = web3.eth.subscribe('pendingTransactions')
 	  }
 });
 
+const writeTxData = () => {
+	fs.writeFileSync(path, JSON.stringify(txData));
+}
 
 //////////////////
 // TOURN EVENTS //
 //////////////////
 
 const handleTournEvent = (obj) => {
-		console.log('tournment event found', obj);
+	txData.push(obj);
+	writeTxData();
+	console.log('tournment event found');
 }
 
 /////////////////
@@ -216,7 +225,9 @@ const handleTournEvent = (obj) => {
 /////////////////
 
 const handleGateEvent = (obj) => {
-		console.log('gatekeeper event found', obj);
+	txData.push(obj);
+	writeTxData();
+	console.log('gatekeeper event found');
 }
 
 //////////////////
@@ -224,7 +235,9 @@ const handleGateEvent = (obj) => {
 //////////////////
 
 const handleGuildEvent = (obj) => {
-		console.log('guild event found', obj);
+	txData.push(obj);
+	writeTxData();
+	console.log('guild event found');
 }
 
 

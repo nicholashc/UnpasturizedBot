@@ -14,6 +14,7 @@ tools for monitoring and automating the CheezeWizards Unpasteurized tournament (
 - [ ] smart gas handling
 - [ ] smart nonce handling
 - [ ] smart account management
+- [ ] fix dotenv variable handlign
 
 ## ToDo - Else
 
