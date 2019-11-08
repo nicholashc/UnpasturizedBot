@@ -4,17 +4,23 @@ tools for monitoring and automating the CheezeWizards Unpasteurized tournament (
 
 ## ToDo - Main Script
 
-- [ ] change event logs to write to a json file
-- [ ] parse events by function sigs and useful info
-- [ ] verifiy tx later
+- [x] change event logs to write to a json file
+- [x] parse events by function sigs and useful info
+- [x] verifiy tx later
+- [x] incorporate function parsing by sig
+- [x] incorporate tx confirmation
+- [x] add event catching for finialized txs
+- [ ] mold handling
 - [ ] generic method to return current time window
 - [ ] detect dr opportunities
 - [ ] test garbage data send
 - [ ] test garbage data send on react
+- [ ] smart pause detection
 - [ ] smart gas handling
 - [ ] smart nonce handling
 - [ ] smart account management
-- [ ] fix dotenv variable handlign
+- [ ] cull rivals
+- [ ] fix dotenv variable handling
 
 ## ToDo - Else
 
