@@ -37,6 +37,11 @@ let dapperBotAddresses = [
 	'0x81051eE0f1cafBCA5D6c167D710642619c05A3c1'
 ];
 
+
+let unknownCullers = [
+	'0x78535daf506ef3a11c27a426bc4d8a2443e0b09c',
+]
+
 let chzXpress = {
 	SWISS_CHEEZE_BANK: '0xED7392aF2263D1404d631E0f920c67EBbC9Cc7Fc',
 	POOL_TOKEN: '0x521871fE28Ab18D7564611e3021e139f37452A43',
@@ -147,6 +152,17 @@ const getBattleWiz = async (id) => {
     return e;
   }
 }
+
+
+const getAscWizId = async () => {
+	try  {
+		return await tournContract.methods.getAscendingWizardId().call();
+	} catch (e) {
+    return e;
+  }
+}
+
+
 
 
 //////////////////
@@ -481,6 +497,7 @@ const sendSigned = async (key, txData) => {
 	}
 }
 
+
 ////////////////
 // TIME LOGIC //
 ////////////////
@@ -498,6 +515,8 @@ const calcCurrentWindow = async () => {
 	let paused = await isGamePaused();
 	let time = await getTimeParameters();
 	let block = await getBlock();
+	let mold = await calcCurrentMold(block);
+	let ascention = await getAscensionInfo();
 
 	if (paused) {
 		return `Block ${block}. Pause until block ${time[0]}.`;
@@ -518,32 +537,82 @@ const calcCurrentWindow = async () => {
 		sessionPassed <= ascDur
 	) {
 		windowLeft = ascDur - sessionPassed;
-		return `Block ${block}. In Ascention for ${windowLeft} more blocks.`;
+		return `Block ${block}. In Ascention for ${windowLeft} more blocks. Mold at ${mold.moldPwr} pwr. ${ascention}`;
 	}
 	else if (
 		sessionPassed <= ascDur + fightDur
 	) {
 		windowLeft = (ascDur + fightDur) - sessionPassed;
-		return `Block ${block}. In Fight for ${windowLeft} more blocks.`;
+		return `Block ${block}. In Fight for ${windowLeft} more blocks. Mold at ${mold.moldPwr} pwr. ${ascention}`;
 	}
 	else if (
 		sessionPassed <= ascDur + fightDur + resDur
 	) {
 		windowLeft = (ascDur + fightDur + resDur) - sessionPassed;
-		return `Block ${block}. In Resolution for ${windowLeft} more blocks.`;
+		return `Block ${block}. In Resolution for ${windowLeft} more blocks. Mold at ${mold.moldPwr} pwr. ${ascention}`;
 	}
 	else if (
 		sessionPassed <= sessionDur
 	) {
 		windowLeft = sessionDur - sessionPassed;
-		return `Block ${block}. In Culling for ${windowLeft} more blocks.`;
+		return `Block ${block}. In Culling for ${windowLeft} more blocks. Mold at ${mold.moldPwr} pwr. ${ascention}`;
 	}
 	else {
 		return 'time calc error'
 	}
 }
 
+////////////////
+// MOLD LOGIC //
+////////////////
 
+const calcCurrentMold = async (block) => {
+	let mold = await getMoldParams();
+
+	let moldBlocks = block - mold[0];
+	let moldDoubles = Math.floor(moldBlocks / mold[2]);
+	let moldLvl = {
+		moldWei: mold[3] * 2**moldDoubles,
+		moldPwr: 2**moldDoubles,
+	}
+
+	return (moldLvl);
+}
+
+/////////////////////
+// ASCENTION LOGIC //
+/////////////////////
+
+const getAscensionInfo = async () => {
+	let ascWiz = await getAscWizId();
+	if (ascWiz != 0) {
+		return `Wizard ${ascWiz} is trying to ascend.`
+	} else {
+		return 'No wizards ascending.'
+	}
+}
+
+const getAscensionDetails = async () => {
+	let ascWiz = await getAscWizId();
+	if (ascWiz != 0) {
+		let battleWiz = await getBattleWiz(ascWiz);
+		let guildWiz = await getGuildWiz(ascWiz);
+		let chamberInfo = {
+			wizId: ascWiz,
+			power: battleWiz.power,
+			affinity: battleWiz.affinity,
+			owner: guildWiz.owner,
+			opponent: battleWiz.opponent != undefined ? true : false,
+		}
+		return chamberInfo;
+	}
+}
+
+
+setTimeout(async ()=>{
+	let block = await web3.eth.getTransactionFromBlock(8891722, 55)
+	console.log(block);
+}, 2000)
 
 ///////////
 // TESTS //

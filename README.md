@@ -10,8 +10,10 @@ tools for monitoring and automating the CheezeWizards Unpasteurized tournament (
 - [x] incorporate function parsing by sig
 - [x] incorporate tx confirmation
 - [x] add event catching for finialized txs
-- [ ] mold handling
-- [ ] generic method to return current time window
+- [x] mold handling
+- [x] ascension handling
+- [x] generic method to return current time window
+- [ ] rework ascension to read from state when challenged
 - [ ] detect dr opportunities
 - [ ] test garbage data send
 - [ ] test garbage data send on react
