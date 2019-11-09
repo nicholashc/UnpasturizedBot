@@ -13,16 +13,17 @@ tools for monitoring and automating the CheezeWizards Unpasteurized tournament (
 - [x] mold handling
 - [x] ascension handling
 - [x] generic method to return current time window
-- [ ] rework ascension to read from state when challenged
-- [ ] detect dr opportunities
-- [ ] test garbage data send
+- [x] rework ascension to read from state when challenged
+- [x] test garbage data send
+- [ ] trigger events at the change between windows
 - [ ] test garbage data send on react
+- [ ] detect dr opportunities
+- [ ] detect ascensions challenge
 - [ ] smart pause detection
 - [ ] smart gas handling
 - [ ] smart nonce handling
 - [ ] smart account management
 - [ ] cull rivals
-- [ ] fix dotenv variable handling
 
 ## ToDo - Else
 

@@ -37,7 +37,6 @@ let dapperBotAddresses = [
 	'0x81051eE0f1cafBCA5D6c167D710642619c05A3c1'
 ];
 
-
 let unknownCullers = [
 	'0x78535daf506ef3a11c27a426bc4d8a2443e0b09c',
 ]
@@ -53,7 +52,6 @@ let chzXpress = {
 let whiteListAddresses = [];
 
 let blackListAddresses = [];
-
 
 
 /////////////////////
@@ -153,7 +151,6 @@ const getBattleWiz = async (id) => {
   }
 }
 
-
 const getAscWizId = async () => {
 	try  {
 		return await tournContract.methods.getAscendingWizardId().call();
@@ -161,8 +158,6 @@ const getAscWizId = async () => {
     return e;
   }
 }
-
-
 
 
 //////////////////
@@ -467,20 +462,26 @@ const handleGuildLog = (obj) => {
 // SEND RAW TX //
 /////////////////
 
+let privKey_01 = process.env.PRIV_KEY_01;
+let privKey_02 = process.env.PRIV_KEY_01;
+let from_01 = process.env.ADDRESS_FROM_01;
+let from_02 = process.env.ADDRESS_FROM_02;
 let defNonce = 0x0;
 let defGasLimit = web3.utils.toHex(200000); //200k
-let defGasPrice = web3.utils.toHex(10000000000); //10 gwei
+let defGasPrice = web3.utils.toHex(1100000000); //1.1 gwei
+let defVal = 0x0;
 
-const formTx = async (txCount, gasL, gasP, addTo, val, data) => {
-	  let txData = {
-	    nonce: txCount,
-	    gasLimit: gasL,
-	    gasPrice: gasP,
-	    to: addTo,
-			value: val,
-			data: data,
-	  }
-		return txData;
+const formatTx = async (txCount, gasL, gasP, addFrom, addTo, val, data, key) => {
+  let txData = {
+    nonce: txCount,
+    gasLimit: gasL,
+    gasPrice: gasP,
+		from: addFrom,
+    to: addTo,
+		value: val,
+		data: data,
+  }
+	return sendSigned(key, txData)
 }
 
 const sendSigned = async (key, txData) => {
@@ -490,12 +491,14 @@ const sendSigned = async (key, txData) => {
 	let txFormated = '0x' + tx.serialize().toString('hex');
 	try {
 		console.log('Sending...', JSON.stringify(txData, null, 2));
-  	const res = await web3.eth.sendSignedTransaction(txFormated);
-		console.log(res);
+  	return await web3.eth.sendSignedTransaction(txFormated);
 	} catch(e) {
 		return e;
 	}
 }
+
+
+//formatTx('0x1', defGasLimit, defGasPrice, from_01, tournAddress, defVal, '0x22f3e2d4', privKey_01).then(console.log);
 
 
 ////////////////
@@ -518,10 +521,6 @@ const calcCurrentWindow = async () => {
 	let mold = await calcCurrentMold(block);
 	let ascention = await getAscensionInfo();
 
-	if (paused) {
-		return `Block ${block}. Pause until block ${time[0]}.`;
-	}
-
 	let ascStart = Number(time[5]);
 	let ascDur = Number(time[6]);
 	let fightDur = Number(time[8]);
@@ -532,33 +531,41 @@ const calcCurrentWindow = async () => {
 	let running = block - ascStart;
 	let sessionPassed = running % sessionDur;
 	let windowLeft = 0;
+	let currentWindow = "";
 
-	if (
-		sessionPassed <= ascDur
-	) {
+	if (sessionPassed <= ascDur) {
 		windowLeft = ascDur - sessionPassed;
-		return `Block ${block}. In Ascention for ${windowLeft} more blocks. Mold at ${mold.moldPwr} pwr. ${ascention}`;
+		currentWindow = "Ascention";
 	}
-	else if (
-		sessionPassed <= ascDur + fightDur
-	) {
+	else if (sessionPassed <= ascDur + fightDur) {
 		windowLeft = (ascDur + fightDur) - sessionPassed;
-		return `Block ${block}. In Fight for ${windowLeft} more blocks. Mold at ${mold.moldPwr} pwr. ${ascention}`;
+		currentWindow = "Fight";
 	}
 	else if (
 		sessionPassed <= ascDur + fightDur + resDur
 	) {
 		windowLeft = (ascDur + fightDur + resDur) - sessionPassed;
-		return `Block ${block}. In Resolution for ${windowLeft} more blocks. Mold at ${mold.moldPwr} pwr. ${ascention}`;
+		currentWindow = "Resolution";
 	}
 	else if (
 		sessionPassed <= sessionDur
 	) {
 		windowLeft = sessionDur - sessionPassed;
-		return `Block ${block}. In Culling for ${windowLeft} more blocks. Mold at ${mold.moldPwr} pwr. ${ascention}`;
+		currentWindow = "Culling";
+	}
+	return logData(paused, block, time[0], currentWindow, windowLeft, mold.moldPwr, ascention);
+}
+
+/////////////
+// LOGGING //
+/////////////
+
+const logData = (paused, block, pauseTime, currentWindow, windowLeft, mold, ascention) => {
+	if (paused) {
+		return `Block ${block}. Paused until block ${pauseTime}. Mold at ${mold} pwr. ${ascention}`;
 	}
 	else {
-		return 'time calc error'
+		return `Block ${block}. In ${currentWindow} for ${windowLeft} more blocks. Mold at ${mold} pwr. ${ascention}`;
 	}
 }
 
@@ -586,7 +593,12 @@ const calcCurrentMold = async (block) => {
 const getAscensionInfo = async () => {
 	let ascWiz = await getAscWizId();
 	if (ascWiz != 0) {
-		return `Wizard ${ascWiz} is trying to ascend.`
+		let challenger = await getBattleWiz(ascWiz);
+		if (challenger.ascensionOpponent != 0) {
+			return `Wizard ${ascWiz} is trying to ascend and challenged by Wizard ${challenger.ascensionOpponent}.`
+		} else {
+			return `Wizard ${ascWiz} is trying to ascend without a challenger.`
+		}
 	} else {
 		return 'No wizards ascending.'
 	}
@@ -607,12 +619,6 @@ const getAscensionDetails = async () => {
 		return chamberInfo;
 	}
 }
-
-
-setTimeout(async ()=>{
-	let block = await web3.eth.getTransactionFromBlock(8891722, 55)
-	console.log(block);
-}, 2000)
 
 ///////////
 // TESTS //
